@@ -21,7 +21,7 @@ device = (
 class RegressionModel(nn.Module):
     def __init__(self):
         super().__init__()
-        self.linear_model = nn.Linear(1, 1)
+        self.linear_model = nn.Linear(1, 1, device=device)
 
     def forward(self, x):
         y_hat = self.linear_model(x)
@@ -36,9 +36,9 @@ n_train = 20
 b0 = 10
 b1 = 2
 x_train = torch.rand(n_train, 1, device=device) * 10
-y_train = torch.normal(b0 + b1 * x_train, torch.ones((n_train, 1)))
+y_train = torch.normal(b0 + b1 * x_train, torch.ones((n_train, 1), device=device))
 
-plt.plot(x_train, y_train, 'o')
+plt.plot(torch.Tensor.cpu(x_train), torch.Tensor.cpu(y_train), 'o')
 plt.show()
 
 # before doing parameter estimation, what do we have?
@@ -107,9 +107,9 @@ def train_loop(dataloader, model, loss_fn, optimizer):
 
 # "hyperparameters"
 # these describe how parameter optimization/estimation should work
-learning_rate = 1e-3
+learning_rate = 1e-2
 batch_size=20
-epochs = 1000
+epochs = 3
 
 # loss function and method for optimizing the loss
 loss_fn = nn.MSELoss()
@@ -125,10 +125,10 @@ estimated_b0, estimated_b1 = get_model_coefs(model)
 print(estimated_b0, estimated_b1)
 
 # make a plot
-x_test = torch.arange(0, 11, dtype=torch.float32)[:, None]
+x_test = torch.arange(0, 11, dtype=torch.float32, device=device)[:, None]
 y_hat = model(x_test)
 
-plt.plot(x_train, y_train, 'o')
-plt.plot(x_test, y_hat.detach().numpy())
+plt.plot(torch.Tensor.cpu(x_train), torch.Tensor.cpu(y_train), 'o')
+plt.plot(torch.Tensor.cpu(x_test), y_hat.detach().numpy())
 plt.show()
 
